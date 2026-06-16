@@ -114,8 +114,13 @@ jobs:
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
-        rm -rf packages
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        # 新建一个纯净的输出目录
+        mkdir -p /workdir/upload_firmware
+        # 分别查找并提取 factory.bin 和 sysupgrade.bin 结尾的文件
+        find . -name "*factory.bin" -exec mv {} /workdir/upload_firmware/ \;
+        find . -name "*sysupgrade.bin" -exec mv {} /workdir/upload_firmware/ \;
+        # 将准备上传的路径指向这个包含这两个文件的新目录
+        echo "FIRMWARE=/workdir/upload_firmware" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload firmware directory
